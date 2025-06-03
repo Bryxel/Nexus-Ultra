@@ -1,0 +1,32 @@
+# Bytecode
+*.pyc
+*.pyo
+__pycache__/
+
+# Database
+*.sqlite3
+
+# Environment
+.env
+*.env
+.env/*
+
+# Virtual environment
+env/
+venv/
+.venv/
+
+# Logs
+*.log
+
+# Media and static files
+media/
+static/
+
+# Test and coverage reports
+.tox/
+htmlcov/
+
+# IDE files
+.idea/
+*.vscode/

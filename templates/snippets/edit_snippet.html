@@ -1,0 +1,33 @@
+<!-- templates/edit_snippet.html -->
+{% extends 'base.html' %}
+
+{% block title %}Edit Snippet - Nexus Ultra{% endblock %}
+
+{% block content %}
+<div class="flex flex-col items-center justify-center min-h-[70vh]">
+    <div class="bg-white rounded-2xl shadow-xl p-10 w-full max-w-lg">
+        <h2 class="text-3xl font-extrabold text-black text-center mb-8">Edit Snippet</h2>
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            {% for field in form %}
+                <div>
+                    <label for="{{ field.id_for_label }}" class="block text-base font-semibold text-gray-800 mb-2">
+                        {{ field.label }}
+                    </label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="text-red-500 text-sm mt-1">
+                            {{ field.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="w-full bg-black text-white px-4 py-3 rounded-lg font-bold text-lg hover:bg-gray-900 transition">Save Changes</button>
+        </form>
+        <div class="mt-6 text-center">
+            <a href="{% url 'snippets' %}" class="text-black font-semibold hover:underline">← Back to Snippets</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

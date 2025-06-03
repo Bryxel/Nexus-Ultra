@@ -1,0 +1,168 @@
+<!-- templates/snippets.html -->
+{% extends 'base.html' %}
+
+{% block title %}My Snippets - Code Snippets{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Add New Snippet Form -->
+    <div class="md:col-span-1">
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+            <h2 class="text-2xl font-extrabold text-black mb-6">Add New Snippet</h2>
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                <!-- Title Field -->
+                <div>
+                    <label for="{{ form.title.id_for_label }}" class="block text-base font-semibold text-gray-800 mb-2">
+                        Title
+                    </label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                        <div class="text-red-500 text-sm mt-1">
+                            {{ form.title.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+                <!-- Code Field -->
+                <div>
+                    <label for="{{ form.code.id_for_label }}" class="block text-base font-semibold text-gray-800 mb-2">
+                        Code
+                    </label>
+                    {{ form.code }}
+                    {% if form.code.errors %}
+                        <div class="text-red-500 text-sm mt-1">
+                            {{ form.code.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+                <!-- Tags Field -->
+                <div>
+                    <label for="{{ form.tags.id_for_label }}" class="block text-base font-semibold text-gray-800 mb-2">
+                        Tags
+                    </label>
+                    {{ form.tags }}
+                    {% if form.tags.errors %}
+                        <div class="text-red-500 text-sm mt-1">
+                            {{ form.tags.errors }}
+                        </div>
+                    {% endif %}
+                    <p class="text-sm text-gray-500 mt-1">Separate tags with commas</p>
+                </div>
+                <button type="submit" 
+                        class="w-full bg-black text-white px-4 py-3 rounded-lg font-bold text-lg hover:bg-gray-900 transition">
+                    Save Snippet
+                </button>
+            </form>
+        </div>
+    </div>
+    <!-- Snippets List -->
+    <div class="md:col-span-2">
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+            <h2 class="text-2xl font-extrabold text-black mb-6">My Snippets</h2>
+            <!-- Search and Filter Form -->
+            <form method="get" class="mb-8">
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <input type="text" 
+                           name="q" 
+                           class="w-full sm:flex-1 rounded-lg border border-gray-300 shadow-sm focus:border-black focus:ring-black px-4 py-3 text-lg" 
+                           placeholder="Search snippets..." 
+                           value="{{ query }}">
+                    <input type="text" 
+                           name="tags" 
+                           class="w-full sm:flex-1 rounded-lg border border-gray-300 shadow-sm focus:border-black focus:ring-black px-4 py-3 text-lg" 
+                           placeholder="Filter by tags..." 
+                           value="{{ tags }}">
+                    <button type="submit" 
+                            class="w-full sm:w-auto bg-white border border-black text-black font-bold px-6 py-3 rounded-lg hover:bg-gray-100 transition">
+                        Search
+                    </button>
+                </div>
+            </form>
+            <!-- Snippets List -->
+            <div class="space-y-6">
+                {% for snippet in snippets %}
+                    <div class="rounded-xl p-6 bg-white shadow">
+                        <!-- Snippet Header -->
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="text-xl font-bold text-black">{{ snippet.title }}</h3>
+                            <div class="flex space-x-2">
+                                <a href="{% url 'snippet_detail' snippet.id %}" 
+                                   class="text-black font-semibold hover:underline">
+                                    View
+                                </a>
+                                <a href="{% url 'edit_snippet' snippet.id %}" 
+                                   class="text-black font-semibold hover:underline">
+                                    Edit
+                                </a>
+                                <a href="{% url 'delete_snippet' snippet.id %}" 
+                                   class="text-red-600 font-semibold hover:underline">
+                                    Delete
+                                </a>
+                            </div>
+                        </div>
+                        <!-- Code Preview -->
+                        <div class="relative">
+                            <pre id="code-{{ snippet.id }}" class="rounded-md p-4 mb-3 overflow-x-auto font-mono text-base text-black bg-white"><code>{{ snippet.code }}</code></pre>
+                            <button
+                                type="button"
+                                class="absolute top-2 right-2 bg-black text-white px-3 py-1 rounded text-sm font-semibold hover:bg-gray-900 transition"
+                                onclick="copyToClipboard('code-{{ snippet.id }}')"
+                            >
+                                Copy
+                            </button>
+                        </div>
+                        <!-- Tags -->
+                        <div class="flex flex-wrap gap-2 mb-3">
+                            {% for tag in snippet.tag_list %}
+                                <span class="bg-black text-white px-2 py-1 rounded-full text-sm font-mono">
+                                    {{ tag }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                        <!-- Timestamp -->
+                        <div class="text-sm text-gray-500">
+                            Created: {{ snippet.created_at|date:"F j, Y" }}
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="text-center py-8">
+                        <p class="text-gray-500">No snippets found.</p>
+                        {% if query or tags %}
+                            <p class="text-sm text-gray-400 mt-2">
+                                Try adjusting your search or filter criteria
+                            </p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+<script>
+function copyToClipboard(elementId) {
+    const codeBlock = document.getElementById(elementId);
+    const text = codeBlock.innerText || codeBlock.textContent;
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(function() {
+            // Optional: show feedback
+        }, function(err) {
+            alert('Failed to copy!');
+        });
+    } else {
+        // Safari fallback
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';  // Prevent scrolling to bottom of page in MS Edge.
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        try {
+            document.execCommand('copy');
+        } catch (err) {
+            alert('Failed to copy!');
+        }
+        document.body.removeChild(textarea);
+    }
+}
+</script>
